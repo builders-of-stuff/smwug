@@ -1,6 +1,6 @@
 <script lang="ts">
-  import UploadForm from '$lib/components/UploadForm.svelte';
-  import UploadsList from '$lib/components/UploadsList.svelte';
+  import UploadForm from '$lib/components/upload-form.svelte';
+  import UploadsList from '$lib/components/uploads-list.svelte';
 
   let uploads: Array<any> = [];
 
