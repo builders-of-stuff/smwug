@@ -1,13 +1,12 @@
 <script lang="ts">
   import UploadForm from '$lib/components/upload-form.svelte';
   import UploadsList from '$lib/components/uploads-list.svelte';
+  import { AGGREGATOR_URL, PUBLIC_SUI_NETWORK } from '$lib/shared/shared.constant';
 
   let uploads: Array<any> = [];
 
-  function handleUpload(event: CustomEvent) {
-    const { info, mediaType } = event.detail;
-
-    const processedInfo = processUploadInfo(info);
+  function handleUpload(uploadData: { info: any; mediaType: string }) {
+    const processedInfo = processUploadInfo(uploadData.info);
     const baseAggregatorUrl = 'https://aggregator.walrus-testnet.walrus.space';
     const blobUrl = `${baseAggregatorUrl}/v1/${processedInfo.blobId}`;
     const suiUrl = `${processedInfo.suiBaseUrl}/${processedInfo.suiRef}`;
@@ -15,7 +14,7 @@
     uploads = [
       {
         info: processedInfo,
-        mediaType,
+        mediaType: uploadData.mediaType,
         blobUrl,
         suiUrl
       },
@@ -24,20 +23,22 @@
   }
 
   function processUploadInfo(storageInfo: any) {
+    console.log('Processing storage info:', storageInfo); // Debug log
+
     const SUI_NETWORK = 'testnet';
     const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`;
     const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${SUI_NETWORK}/object`;
 
-    if ('alreadyCertified' in storageInfo) {
+    if (storageInfo.alreadyCertified) {
       return {
         status: 'Already certified',
         blobId: storageInfo.alreadyCertified.blobId,
         endEpoch: storageInfo.alreadyCertified.endEpoch,
         suiRefType: 'Previous Sui Certified Event',
-        suiRef: storageInfo.alreadyCertified.event.txDigest,
+        suiRef: storageInfo.alreadyCertified.event?.txDigest,
         suiBaseUrl: SUI_VIEW_TX_URL
       };
-    } else if ('newlyCreated' in storageInfo) {
+    } else if (storageInfo.newlyCreated) {
       return {
         status: 'Newly created',
         blobId: storageInfo.newlyCreated.blobObject.blobId,
@@ -47,7 +48,8 @@
         suiBaseUrl: SUI_VIEW_OBJECT_URL
       };
     } else {
-      throw Error('Unhandled successful response!');
+      console.error('Unexpected storage info structure:', storageInfo);
+      throw Error('Unhandled response structure!');
     }
   }
 </script>
@@ -80,7 +82,7 @@
         to store bigger files.
       </p>
 
-      <UploadForm on:upload={handleUpload} />
+      <UploadForm onUpload={handleUpload} />
     </section>
 
     <section>

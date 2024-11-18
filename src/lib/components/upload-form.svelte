@@ -5,23 +5,16 @@
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { uploadStore } from '$lib/stores/upload-store';
   import { Loader2 } from 'lucide-svelte';
-  import { createEventDispatcher } from 'svelte';
 
-  const dispatch = createEventDispatcher<{
-    upload: {
-      info: any;
-      mediaType: string;
-    };
-  }>();
+  let { onUpload } = $props();
 
   let publisherUrl = 'https://publisher.walrus-testnet.walrus.space';
   let aggregatorUrl = 'https://aggregator.walrus-testnet.walrus.space';
-  let epochs = 1;
-  let selectedFile: File | null = null;
+  let epochs = $state(1);
+  let selectedFile = $state<File | null>(null);
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
-    console.log('Selected file at submit:', selectedFile); // Debug log
 
     if (!selectedFile) {
       $uploadStore.error = 'Please select a file';
@@ -32,7 +25,6 @@
     $uploadStore.error = null;
 
     try {
-      console.log('Starting upload for file:', selectedFile.name); // Debug log
       const response = await fetch(`${publisherUrl}/v1/store?epochs=${epochs}`, {
         method: 'PUT',
         body: selectedFile
@@ -44,9 +36,9 @@
       }
 
       const info = await response.json();
-      console.log('Upload successful:', info); // Debug log
 
-      dispatch('upload', {
+      // Call onUpload directly with the data object
+      onUpload({
         info,
         mediaType: selectedFile.type
       });
@@ -75,7 +67,7 @@
   }
 </script>
 
-<form on:submit={handleSubmit} class="space-y-4">
+<form onsubmit={handleSubmit} class="space-y-4">
   <div class="grid gap-4">
     <div class="grid gap-2">
       <Label for="publisher-url">Publisher URL</Label>
