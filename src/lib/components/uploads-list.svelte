@@ -1,12 +1,14 @@
 <script lang="ts">
   import { Card, CardContent } from '$lib/components/ui/card';
 
-  export let uploads: Array<{
-    info: any;
-    mediaType: string;
-    blobUrl: string;
-    suiUrl: string;
-  }> = [];
+  let { uploads } = $props<{
+    uploads: Array<{
+      info: any;
+      mediaType: string;
+      blobUrl: string;
+      suiUrl: string;
+    }>;
+  }>();
 
   const SUI_NETWORK = 'testnet';
   const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`;

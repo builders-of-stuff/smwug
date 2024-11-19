@@ -1,15 +1,17 @@
 <script lang="ts">
+  import { Loader2 } from 'lucide-svelte';
+
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { uploadStore } from '$lib/stores/upload-store';
-  import { Loader2 } from 'lucide-svelte';
+  import { AGGREGATOR_URL, PUBLISHER_URL } from '$lib/shared/shared.constant';
 
-  let { onUpload } = $props();
+  let { handleUpload } = $props();
 
-  let publisherUrl = 'https://publisher.walrus-testnet.walrus.space';
-  let aggregatorUrl = 'https://aggregator.walrus-testnet.walrus.space';
+  let publisherUrl = $state(PUBLISHER_URL);
+  let aggregatorUrl = $state(AGGREGATOR_URL);
   let epochs = $state(1);
   let selectedFile = $state<File | null>(null);
 
@@ -37,8 +39,7 @@
 
       const info = await response.json();
 
-      // Call onUpload directly with the data object
-      onUpload({
+      handleUpload({
         info,
         mediaType: selectedFile.type
       });
@@ -58,6 +59,7 @@
 
   function handleFileChange(event: Event) {
     const target = event.target as HTMLInputElement;
+    console.log('target: ', target.files);
     if (target.files && target.files.length > 0) {
       selectedFile = target.files[0];
       console.log('File selected:', selectedFile.name); // Debug log

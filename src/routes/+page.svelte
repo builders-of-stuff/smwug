@@ -7,8 +7,7 @@
 
   function handleUpload(uploadData: { info: any; mediaType: string }) {
     const processedInfo = processUploadInfo(uploadData.info);
-    const baseAggregatorUrl = 'https://aggregator.walrus-testnet.walrus.space';
-    const blobUrl = `${baseAggregatorUrl}/v1/${processedInfo.blobId}`;
+    const blobUrl = `${AGGREGATOR_URL}/v1/${processedInfo.blobId}`;
     const suiUrl = `${processedInfo.suiBaseUrl}/${processedInfo.suiRef}`;
 
     uploads = [
@@ -25,9 +24,8 @@
   function processUploadInfo(storageInfo: any) {
     console.log('Processing storage info:', storageInfo); // Debug log
 
-    const SUI_NETWORK = 'testnet';
-    const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`;
-    const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${SUI_NETWORK}/object`;
+    const SUI_VIEW_TX_URL = `https://suiscan.xyz/${PUBLIC_SUI_NETWORK}/tx`;
+    const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${PUBLIC_SUI_NETWORK}/object`;
 
     if (storageInfo.alreadyCertified) {
       return {
@@ -82,7 +80,7 @@
         to store bigger files.
       </p>
 
-      <UploadForm onUpload={handleUpload} />
+      <UploadForm {handleUpload} />
     </section>
 
     <section>
