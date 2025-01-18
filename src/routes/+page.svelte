@@ -12,7 +12,11 @@
     ConnectButton,
     testnetWalletAdapter as walletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import { createListing, destroyListing } from '$lib/shared/contract.tools';
+  import {
+    createListing,
+    destroyListing,
+    getListings
+  } from '$lib/shared/contract.tools';
 
   // Mock data for projects
   const projects = [
@@ -48,11 +52,15 @@
       '0xbf338e5e3366ea00796ed69e41c1967aec6d1137685b6c49da08594992db4eb7'
     );
   };
+
+  const handleGetListings = async () => {
+    const listings = await getListings();
+  };
 </script>
 
 <Button onclick={handleCreateListing}>Create</Button>
 <Button onclick={handleDestroyListing}>Destroy</Button>
-
+<Button onclick={handleGetListings}>Get Listings</Button>
 <div class="container mx-auto p-4">
   <div class="mb-6 flex items-center justify-between">
     <div class="flex items-center gap-4">
