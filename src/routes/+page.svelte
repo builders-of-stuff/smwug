@@ -8,9 +8,27 @@
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
   import { createListing } from '$lib/shared/contract.tools';
   import { appState } from '$lib/shared/app.state.svelte';
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+  } from '$lib/components/ui/dialog';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { Textarea } from '$lib/components/ui/textarea';
+
+  let isDialogOpen = $state(false);
+  let title = $state('');
+  let description = $state('');
 
   const handleCreateListing = async () => {
     await createListing();
+    isDialogOpen = false;
+    title = '';
+    description = '';
   };
 
   /**
@@ -36,7 +54,9 @@
       <div class="text-2xl font-bold">Show Me What You Got</div>
     </div>
     <div class="flex items-center gap-4">
-      <Button variant="ghost" class="">Create listing</Button>
+      <Button variant="ghost" onclick={() => (isDialogOpen = true)}>
+        Create listing
+      </Button>
       <ConnectButton {walletAdapter} />
     </div>
   </div>
@@ -65,3 +85,34 @@
     </div>
   {/if}
 </div>
+
+<Dialog bind:open={isDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Create New Listing</DialogTitle>
+      <DialogDescription>
+        Fill out the form below to create a new listing.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div class="grid gap-4 py-4">
+      <div class="grid gap-2">
+        <Label for="title">Title</Label>
+        <Input id="title" bind:value={title} placeholder="Enter listing title" />
+      </div>
+      <div class="grid gap-2">
+        <Label for="description">Description</Label>
+        <Textarea
+          id="description"
+          bind:value={description}
+          placeholder="Enter listing description"
+        />
+      </div>
+    </div>
+
+    <DialogFooter>
+      <Button variant="outline" onclick={() => (isDialogOpen = false)}>Cancel</Button>
+      <Button onclick={handleCreateListing}>Create</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
