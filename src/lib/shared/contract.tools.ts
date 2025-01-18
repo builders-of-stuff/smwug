@@ -53,6 +53,13 @@ export const createListing = async () => {
  * Destroy listing
  */
 export const destroyListing = async (listingId: string) => {
+  // e.g.
+  // const handleDestroyListing = async () => {
+  //   await destroyListing(
+  //     '0xbf338e5e3366ea00796ed69e41c1967aec6d1137685b6c49da08594992db4eb7'
+  //   );
+  // };
+
   if (!walletAdapter?.currentAccount?.address) {
     return;
   }

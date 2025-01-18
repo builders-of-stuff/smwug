@@ -2,8 +2,9 @@ import { getListings } from './contract.tools';
 import type { Listing } from './shared.type';
 
 export class AppState {
-  hasFetchedListings: boolean = $state(false);
   listings: Listing[] = $state([]);
+  hasFetchedListings: boolean = $state(false);
+  hasListings: boolean = $derived(this.listings.length > 0);
 
   constructor() {}
 
