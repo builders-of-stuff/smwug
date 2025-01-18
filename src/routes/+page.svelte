@@ -12,6 +12,7 @@
     ConnectButton,
     testnetWalletAdapter as walletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
+  import { createListing, destroyListing } from '$lib/shared/contract.tools';
 
   // Mock data for projects
   const projects = [
@@ -37,7 +38,20 @@
       upvotes: 15
     }
   ];
+
+  const handleCreateListing = async () => {
+    await createListing();
+  };
+
+  const handleDestroyListing = async () => {
+    await destroyListing(
+      '0xbf338e5e3366ea00796ed69e41c1967aec6d1137685b6c49da08594992db4eb7'
+    );
+  };
 </script>
+
+<Button onclick={handleCreateListing}>Create</Button>
+<Button onclick={handleDestroyListing}>Destroy</Button>
 
 <div class="container mx-auto p-4">
   <div class="mb-6 flex items-center justify-between">
