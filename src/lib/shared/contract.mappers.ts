@@ -6,7 +6,7 @@ export const formatContractListings = (getObjectResponse: any) => {
     const listings = field?.map?.((listing: any) => {
       return {
         id: listing?.fields?.id?.id,
-        name: listing?.fields?.name,
+        title: listing?.fields?.name,
         subtitle: listing?.fields?.subtitle,
         description: listing?.fields?.description,
         imageBlobId: listing?.fields?.image_blob_id,

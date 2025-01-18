@@ -5,6 +5,9 @@ import { formatContractListings } from './contract.mappers';
 
 const walletAdapter = testnetWalletAdapter;
 
+/**
+ * Create listing
+ */
 export const createListing = async () => {
   if (!walletAdapter?.currentAccount?.address) {
     return;
@@ -46,6 +49,9 @@ export const createListing = async () => {
   }
 };
 
+/**
+ * Destroy listing
+ */
 export const destroyListing = async (listingId: string) => {
   if (!walletAdapter?.currentAccount?.address) {
     return;
@@ -84,6 +90,9 @@ export const destroyListing = async (listingId: string) => {
   }
 };
 
+/**
+ * Get listings & map to frontend format
+ */
 export const getListings = async () => {
   if (!walletAdapter?.currentAccount?.address) {
     return;
@@ -96,10 +105,9 @@ export const getListings = async () => {
     }
   });
 
-  console.log('listings: ', JSON.stringify(listings, null, 2));
+  // console.log('listings: ', listings);
 
-  const mapped = formatContractListings(listings);
+  const mappedListings = formatContractListings(listings);
 
-  console.log('mapped: ', JSON.stringify(mapped, null, 2));
-  return listings;
+  return mappedListings;
 };

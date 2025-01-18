@@ -1,22 +1,13 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription
-  } from '$lib/components/ui/card';
   import { Badge } from '$lib/components/ui/badge';
   import {
     ConnectButton,
     testnetWalletAdapter as walletAdapter
   } from '@builders-of-stuff/svelte-sui-wallet-adapter';
-  import {
-    createListing,
-    destroyListing,
-    getListings
-  } from '$lib/shared/contract.tools';
+  import { createListing, destroyListing } from '$lib/shared/contract.tools';
+  import { appState } from '$lib/shared/app.state.svelte';
+  import { untrack } from 'svelte';
 
   // Mock data for projects
   const projects = [
@@ -53,14 +44,26 @@
     );
   };
 
-  const handleGetListings = async () => {
-    const listings = await getListings();
-  };
+  /**
+   * Fetch listings upon connect
+   */
+  $effect(() => {
+    if (!walletAdapter.isConnected || appState.hasFetchedListings) {
+      return;
+    }
+
+    untrack(() => {
+      (async () => {
+        await appState.getListings();
+      })();
+    });
+  });
 </script>
 
 <Button onclick={handleCreateListing}>Create</Button>
 <Button onclick={handleDestroyListing}>Destroy</Button>
-<Button onclick={handleGetListings}>Get Listings</Button>
+<Button onclick={appState.getListings}>Get Listings</Button>
+
 <div class="container mx-auto p-4">
   <div class="mb-6 flex items-center justify-between">
     <div class="flex items-center gap-4">
@@ -74,30 +77,21 @@
   </div>
 
   <div class="divide-y rounded-lg border">
-    {#each projects as project}
+    {#each appState.listings as listing}
       <div class="flex items-center gap-4 p-4 hover:bg-gray-50">
         <div class="h-16 w-16 shrink-0 rounded-lg bg-gray-200"></div>
         <div class="flex-1">
-          <h3 class="text-lg font-semibold">{project.title}</h3>
-          <p class="text-sm text-gray-500">{project.description}</p>
-          <div class="mt-2 flex gap-2">
-            {#each project.tags as tag}
-              <Badge
-                variant="secondary"
-                class="rounded-md bg-gray-100 text-gray-700 hover:bg-gray-100"
-                >{tag}</Badge
-              >
-            {/each}
-          </div>
+          <h3 class="text-lg font-semibold">{listing.title}</h3>
+          <p class="text-sm text-gray-500">{listing.description}</p>
         </div>
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-2 text-gray-500">
             <span class="i-lucide-message-square text-lg" />
-            <span>{project.comments}</span>
+            <span>{listing.comments}</span>
           </div>
           <div class="flex items-center gap-2 text-gray-500">
             <span class="i-lucide-arrow-up text-lg" />
-            <span>{project.upvotes}</span>
+            <span>{listing.upvotes}</span>
           </div>
         </div>
       </div>

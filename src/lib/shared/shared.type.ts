@@ -32,3 +32,15 @@ export interface Upload {
   blobUrl: string;
   suiUrl: string;
 }
+
+export type Listing = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  imageBlobId: string;
+  yearMonth: string;
+  owner: string;
+  comments: any[];
+  upvotes: any[];
+};
