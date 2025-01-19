@@ -1,8 +1,10 @@
 module smwug::smwug;
 
 use std::string::String;
+use sui::event;
 use sui::vec_map::{Self, VecMap};
 
+// === Structs ===
 public struct ListingsRegistry has key {
     id: UID,
     // Keyed by year-month
@@ -30,6 +32,18 @@ public struct Comment has key, store {
     listing_id: ID,
 }
 
+// === Events ===
+public struct ListingCreated has copy, drop {
+    listing_id: ID,
+    owner: address,
+    year_month: String,
+    title: String,
+    subtitle: String,
+    description: String,
+    image_blob_id: String,
+}
+
+// === Functions ===
 fun init(ctx: &mut TxContext) {
     let listings_registry = ListingsRegistry {
         id: object::new(ctx),
@@ -59,6 +73,16 @@ public fun create_listing(
         comments: vector::empty(),
         upvotes: vector::empty(),
     };
+
+    event::emit(ListingCreated {
+        listing_id: object::id(&listing),
+        owner: listing.owner,
+        year_month,
+        title,
+        subtitle,
+        description,
+        image_blob_id,
+    });
 
     if (vec_map::contains(&registry.listings, &year_month)) {
         let listings_vec = vec_map::get_mut(&mut registry.listings, &year_month);

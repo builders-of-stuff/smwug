@@ -1,29 +1,44 @@
 import { testnetWalletAdapter } from '@builders-of-stuff/svelte-sui-wallet-adapter';
 import { Transaction } from '@mysten/sui/transactions';
+
+import { appState } from '$lib/shared/app.state.svelte';
+
 import { LISTINGS_REGISTRY_ID, PACKAGE_ID } from './shared.constant';
-import { formatContractListings } from './contract.mappers';
+import { formatContractListings, formatListingsCreatedEvent } from './contract.mappers';
 
 const walletAdapter = testnetWalletAdapter;
 
 /**
  * Create listing
  */
-export const createListing = async () => {
+export const createListing = async ({
+  title,
+  subtitle,
+  description,
+  blobId
+}: {
+  title: string;
+  subtitle: string;
+  description: string;
+  blobId: string;
+}) => {
   if (!walletAdapter?.currentAccount?.address) {
     return;
   }
 
   const tx = new Transaction();
 
+  const yearDateString = `${new Date().getFullYear().toString()}-${new Date().getMonth() + 1}`;
+
   tx.moveCall({
     target: `${PACKAGE_ID}::smwug::create_listing`,
     arguments: [
       tx.object(`${LISTINGS_REGISTRY_ID}`),
-      tx.pure.string('2025-02'),
-      tx.pure.string('My Listing'),
-      tx.pure.string('My Subtitle'),
-      tx.pure.string('My Description'),
-      tx.pure.string(`placeholder blob id`)
+      tx.pure.string(yearDateString),
+      tx.pure.string(title),
+      tx.pure.string(subtitle),
+      tx.pure.string(description),
+      tx.pure.string(blobId || 'placeholder blob id')
     ]
   });
 
@@ -41,6 +56,9 @@ export const createListing = async () => {
         showRawInput: true
       }
     });
+
+    const listing = formatListingsCreatedEvent(executedTx);
+    appState.addListing(listing);
 
     console.log('executedTx: ', executedTx);
     return executedTx;

@@ -6,7 +6,7 @@ export const formatContractListings = (getObjectResponse: any) => {
     const listings = field?.map?.((listing: any) => {
       return {
         id: listing?.fields?.id?.id,
-        title: listing?.fields?.name,
+        title: listing?.fields?.title,
         subtitle: listing?.fields?.subtitle,
         description: listing?.fields?.description,
         imageBlobId: listing?.fields?.image_blob_id,
@@ -20,4 +20,24 @@ export const formatContractListings = (getObjectResponse: any) => {
   });
 
   return listings;
+};
+
+export const formatListingsCreatedEvent = (createListingExecutedTx: any) => {
+  const events = createListingExecutedTx?.events;
+  const listingCreatedEvent = events[0];
+  const parsedJson = listingCreatedEvent?.parsedJson;
+
+  const listing = {
+    id: parsedJson?.listing_id,
+    title: parsedJson?.title,
+    subtitle: parsedJson?.subtitle,
+    description: parsedJson?.description,
+    imageBlobId: parsedJson?.image_blob_id,
+    yearMonth: parsedJson?.year_month,
+    owner: parsedJson?.owner,
+    comments: [],
+    upvotes: []
+  };
+
+  return listing;
 };

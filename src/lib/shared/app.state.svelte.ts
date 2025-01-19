@@ -13,6 +13,10 @@ export class AppState {
     this.listings = listings;
     this.hasFetchedListings = true;
   }
+
+  addListing(listing: Listing) {
+    this.listings.push(listing);
+  }
 }
 
 export const appState = new AppState();

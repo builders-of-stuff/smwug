@@ -22,13 +22,22 @@
 
   let isDialogOpen = $state(false);
   let title = $state('');
+  let subtitle = $state('');
   let description = $state('');
+  let blobId = $state('');
 
   const handleCreateListing = async () => {
-    await createListing();
+    await createListing({
+      title,
+      subtitle,
+      description,
+      blobId
+    });
     isDialogOpen = false;
     title = '';
+    subtitle = '';
     description = '';
+    blobId = '';
   };
 
   /**
@@ -99,6 +108,14 @@
       <div class="grid gap-2">
         <Label for="title">Title</Label>
         <Input id="title" bind:value={title} placeholder="Enter listing title" />
+      </div>
+      <div class="grid gap-2">
+        <Label for="subtitle">Subtitle</Label>
+        <Input
+          id="subtitle"
+          bind:value={subtitle}
+          placeholder="Enter listing subtitle"
+        />
       </div>
       <div class="grid gap-2">
         <Label for="description">Description</Label>
