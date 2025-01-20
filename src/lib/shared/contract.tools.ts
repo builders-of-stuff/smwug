@@ -38,7 +38,7 @@ export const createListing = async ({
       tx.pure.string(title),
       tx.pure.string(subtitle),
       tx.pure.string(description),
-      tx.pure.string(blobId || 'placeholder blob id')
+      tx.pure.string(blobId || 'null')
     ]
   });
 

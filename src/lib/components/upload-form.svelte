@@ -27,8 +27,10 @@
     $uploadStore.error = null;
 
     try {
-      const response = await fetch(`${publisherUrl}/v1/store?epochs=${epochs}`, {
+      const response = await fetch(`${publisherUrl}/v1/blobs?epochs=${epochs}`, {
         method: 'PUT',
+        // set request mode to no-cors
+        // mode: 'no-cors',
         body: selectedFile
       });
 

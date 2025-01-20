@@ -7,7 +7,7 @@
 
   function handleUpload(uploadData: { info: any; mediaType: string }) {
     const processedInfo = processUploadInfo(uploadData.info);
-    const blobUrl = `${AGGREGATOR_URL}/v1/${processedInfo.blobId}`;
+    const blobUrl = `${AGGREGATOR_URL}/v1/blobs/${processedInfo.blobId}`;
     const suiUrl = `${processedInfo.suiBaseUrl}/${processedInfo.suiRef}`;
 
     uploads = [

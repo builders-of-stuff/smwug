@@ -19,12 +19,16 @@
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import { Textarea } from '$lib/components/ui/textarea';
+  import { AGGREGATOR_URL, PUBLISHER_URL } from '$lib/shared/shared.constant';
 
   let isDialogOpen = $state(false);
   let title = $state('');
   let subtitle = $state('');
   let description = $state('');
   let blobId = $state('');
+  let fileInput = $state<HTMLInputElement | null>(null);
+
+  let isUploadingToWalrus = $state(false);
 
   const handleCreateListing = async () => {
     await createListing({
@@ -33,11 +37,38 @@
       description,
       blobId
     });
+
     isDialogOpen = false;
     title = '';
     subtitle = '';
     description = '';
     blobId = '';
+  };
+
+  const handleFileUpload = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    // const formData = new FormData();
+    // formData.append('file', file);
+
+    try {
+      isUploadingToWalrus = true;
+
+      const response = await fetch(`${PUBLISHER_URL}/v1/blobs?epochs=${100}`, {
+        method: 'PUT',
+        body: file
+      });
+      const data = await response.json();
+
+      console.log('data: ', data);
+      blobId = data?.newlyCreated?.blobObject?.blobId || data?.alreadyCertified?.blobId;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
+      isUploadingToWalrus = false;
+    }
   };
 
   /**
@@ -73,8 +104,21 @@
   {#if appState.hasListings}
     <div transition:slide class="divide-y rounded-lg border">
       {#each appState.listings as listing}
+        {@const blobId = listing.imageBlobId}
+        {@const isLegitBlobId =
+          blobId && blobId !== 'null' && blobId !== 'placeholder blob id'}
+        {@const blobUrl = `${AGGREGATOR_URL}/v1/blobs/${blobId}`}
+
         <div class="flex items-center gap-4 p-4 hover:bg-gray-50">
-          <div class="h-16 w-16 shrink-0 rounded-lg bg-gray-200"></div>
+          {#if isLegitBlobId}
+            <img
+              src={blobUrl}
+              alt={'thumbnail'}
+              class="h-16 w-16 shrink-0 rounded-lg object-cover"
+            />
+          {:else}
+            <div class="h-16 w-16 shrink-0 rounded-lg bg-gray-200"></div>
+          {/if}
           <div class="flex-1">
             <h3 class="text-lg font-semibold">{listing.title}</h3>
             <p class="text-sm text-gray-500">{listing.description}</p>
@@ -125,11 +169,33 @@
           placeholder="Enter listing description"
         />
       </div>
+      <div class="grid gap-2">
+        <Label for="file">Upload File</Label>
+        <input
+          id="file"
+          type="file"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          bind:this={fileInput}
+          onchange={handleFileUpload}
+          accept="image/*,video/*,audio/*"
+        />
+        {#if blobId}
+          <p class="text-sm text-green-600">
+            File uploaded successfully! Blob ID: {blobId}
+          </p>
+        {/if}
+      </div>
     </div>
 
     <DialogFooter>
       <Button variant="outline" onclick={() => (isDialogOpen = false)}>Cancel</Button>
-      <Button onclick={handleCreateListing}>Create</Button>
+      <Button disabled={isUploadingToWalrus || !title} onclick={handleCreateListing}>
+        {#if isUploadingToWalrus}
+          Uploading...
+        {:else}
+          Create
+        {/if}
+      </Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>
