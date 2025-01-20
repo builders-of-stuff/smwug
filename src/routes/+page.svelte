@@ -20,6 +20,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Textarea } from '$lib/components/ui/textarea';
   import { AGGREGATOR_URL, PUBLISHER_URL } from '$lib/shared/shared.constant';
+  import type { Listing } from '$lib/shared/shared.type';
 
   let isDialogOpen = $state(false);
   let title = $state('');
@@ -29,6 +30,9 @@
   let fileInput = $state<HTMLInputElement | null>(null);
 
   let isUploadingToWalrus = $state(false);
+
+  let selectedListing: Listing | null = $state(null);
+  let isUpvoted = $state(false);
 
   const handleCreateListing = async () => {
     await createListing({
@@ -50,8 +54,6 @@
     if (!input.files?.length) return;
 
     const file = input.files[0];
-    // const formData = new FormData();
-    // formData.append('file', file);
 
     try {
       isUploadingToWalrus = true;
@@ -85,6 +87,28 @@
       })();
     });
   });
+
+  async function handleUpvote() {
+    // Implement upvote logic
+    isUpvoted = !isUpvoted;
+    // selectedListing.upvotes += isUpvoted ? 1 : -1;
+  }
+
+  async function handleDelete() {
+    if (!selectedListing) return;
+
+    await appState.deleteListing(selectedListing.id, selectedListing.yearMonth);
+    closeModal();
+  }
+
+  function openModal(listing: Listing) {
+    selectedListing = listing;
+    isUpvoted = false; // Reset upvote state when opening new listing
+  }
+
+  function closeModal() {
+    selectedListing = null;
+  }
 </script>
 
 <div class="container mx-auto p-4">
@@ -109,7 +133,13 @@
           blobId && blobId !== 'null' && blobId !== 'placeholder blob id'}
         {@const blobUrl = `${AGGREGATOR_URL}/v1/blobs/${blobId}`}
 
-        <div class="flex items-center gap-4 p-4 hover:bg-gray-50">
+        <div
+          role="button"
+          tabindex="0"
+          onclick={() => openModal(listing)}
+          onkeypress={(e) => e.key === 'Enter' && openModal(listing)}
+          class="flex cursor-pointer items-center gap-4 p-4 hover:bg-gray-50"
+        >
           {#if isLegitBlobId}
             <img
               src={blobUrl}
@@ -197,5 +227,34 @@
         {/if}
       </Button>
     </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+<!-- Listing Detail Modal -->
+<Dialog open={selectedListing !== null} onOpenChange={(open) => !open && closeModal()}>
+  <DialogContent class="sm:max-w-2xl">
+    {#if selectedListing}
+      <DialogHeader>
+        <DialogTitle class="text-3xl font-bold">{selectedListing.title}</DialogTitle>
+      </DialogHeader>
+
+      <div class="space-y-4 py-4">
+        <p class="text-gray-600">{selectedListing.description}</p>
+
+        <div class="flex gap-2">
+          <Button variant={isUpvoted ? 'default' : 'outline'} onclick={handleUpvote}>
+            ↑ {selectedListing.upvotes.length}
+          </Button>
+
+          {#if walletAdapter.currentAccount?.address === selectedListing.owner}
+            <Button variant="destructive" onclick={handleDelete}>Delete</Button>
+          {/if}
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onclick={closeModal}>Close</Button>
+      </DialogFooter>
+    {/if}
   </DialogContent>
 </Dialog>

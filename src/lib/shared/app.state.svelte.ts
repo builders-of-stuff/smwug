@@ -1,4 +1,4 @@
-import { getListings } from './contract.tools';
+import { destroyListing, getListings } from './contract.tools';
 import type { Listing } from './shared.type';
 
 export class AppState {
@@ -16,6 +16,17 @@ export class AppState {
 
   addListing(listing: Listing) {
     this.listings.push(listing);
+  }
+
+  getListing(listingId: string) {
+    console;
+
+    return this.listings.find((listing) => listing.id === listingId);
+  }
+
+  async deleteListing(listingId: string, yearMonth: string) {
+    await destroyListing(listingId, yearMonth);
+    this.listings = this.listings.filter((listing) => listing.id !== listingId);
   }
 }
 
