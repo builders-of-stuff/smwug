@@ -20,7 +20,6 @@
   import { Label } from '$lib/components/ui/label';
   import { Textarea } from '$lib/components/ui/textarea';
   import { AGGREGATOR_URL, PUBLISHER_URL } from '$lib/shared/shared.constant';
-  import type { Listing } from '$lib/shared/shared.type';
 
   let isDialogOpen = $state(false);
   let title = $state('');
@@ -30,9 +29,6 @@
   let fileInput = $state<HTMLInputElement | null>(null);
 
   let isUploadingToWalrus = $state(false);
-
-  let selectedListing: Listing | null = $state(null);
-  let isUpvoted = $state(false);
 
   const handleCreateListing = async () => {
     await createListing({
@@ -87,22 +83,6 @@
       })();
     });
   });
-
-  async function handleDelete() {
-    if (!selectedListing) return;
-
-    await appState.deleteListing(selectedListing.id, selectedListing.yearMonth);
-    closeModal();
-  }
-
-  function openModal(listing: Listing) {
-    selectedListing = listing;
-    isUpvoted = false; // Reset upvote state when opening new listing
-  }
-
-  function closeModal() {
-    selectedListing = null;
-  }
 </script>
 
 <div class="container mx-auto p-4">
@@ -130,8 +110,8 @@
         <div
           role="button"
           tabindex="0"
-          onclick={() => openModal(listing)}
-          onkeypress={(e) => e.key === 'Enter' && openModal(listing)}
+          onclick={() => appState.openListingModal(listing)}
+          onkeypress={(e) => e.key === 'Enter' && appState.openListingModal(listing)}
           class="flex cursor-pointer items-center gap-4 p-4 hover:bg-gray-50"
         >
           {#if isLegitBlobId}
@@ -226,48 +206,62 @@
 </Dialog>
 
 <!-- Listing Detail Modal -->
-<Dialog open={selectedListing !== null} onOpenChange={(open) => !open && closeModal()}>
+<Dialog
+  open={appState.selectedListing !== null}
+  onOpenChange={(open) => !open && appState.closeListingModal()}
+>
   <DialogContent class="sm:max-w-2xl">
-    {#if selectedListing}
+    {#if appState.selectedListing}
       <DialogHeader>
-        <DialogTitle class="text-3xl font-bold">{selectedListing.title}</DialogTitle>
-        <DialogDescription class="text-xl">{selectedListing.subtitle}</DialogDescription
+        <DialogTitle class="text-3xl font-bold"
+          >{appState.selectedListing.title}</DialogTitle
+        >
+        <DialogDescription class="text-xl"
+          >{appState.selectedListing.subtitle}</DialogDescription
         >
       </DialogHeader>
 
       <div class="space-y-4 py-4">
-        {#if selectedListing.imageBlobId && selectedListing.imageBlobId !== 'null' && selectedListing.imageBlobId !== 'placeholder blob id'}
+        {#if appState.selectedListing.imageBlobId && appState.selectedListing.imageBlobId !== 'null' && appState.selectedListing.imageBlobId !== 'placeholder blob id'}
           <img
-            src={`${AGGREGATOR_URL}/v1/blobs/${selectedListing.imageBlobId}`}
-            alt={selectedListing.title}
+            src={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
+            alt={appState.selectedListing.title}
             class="w-full rounded-lg object-cover"
           />
         {/if}
-        <p class="text-gray-600">{selectedListing.description}</p>
+        <p class="text-gray-600">{appState.selectedListing.description}</p>
 
         <div class="flex gap-2">
           <Button
-            variant={isUpvoted ? 'default' : 'outline'}
+            variant={appState.isUpvoted ? 'default' : 'outline'}
             onclick={() =>
-              selectedListing &&
+              appState.selectedListing &&
               walletAdapter.currentAccount &&
               appState.upvoteDownvoteListing(
-                selectedListing?.id,
-                selectedListing?.yearMonth,
+                appState.selectedListing?.id,
+                appState.selectedListing?.yearMonth,
                 walletAdapter.currentAccount?.address
               )}
           >
-            ↑ {selectedListing.upvotes.length}
+            ↑ {appState.listings.find((l) => l.id === appState.selectedListing?.id)
+              ?.upvotes.length ?? appState.selectedListing?.upvotes.length}
           </Button>
 
-          {#if walletAdapter.currentAccount?.address === selectedListing.owner}
-            <Button variant="destructive" onclick={handleDelete}>Delete</Button>
+          {#if walletAdapter.currentAccount?.address === appState.selectedListing.owner}
+            <Button
+              variant="destructive"
+              onclick={() => appState.deleteSelectedListing()}
+            >
+              Delete
+            </Button>
           {/if}
         </div>
       </div>
 
       <DialogFooter>
-        <Button variant="outline" onclick={closeModal}>Close</Button>
+        <Button variant="outline" onclick={() => appState.closeListingModal()}>
+          Close
+        </Button>
       </DialogFooter>
     {/if}
   </DialogContent>

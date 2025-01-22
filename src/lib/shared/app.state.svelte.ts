@@ -5,6 +5,8 @@ export class AppState {
   listings: Listing[] = $state([]);
   hasFetchedListings: boolean = $state(false);
   hasListings: boolean = $derived(this.listings.length > 0);
+  selectedListing: Listing | null = $state(null);
+  isUpvoted: boolean = $state(false);
 
   constructor() {}
 
@@ -43,6 +45,21 @@ export class AppState {
       }
       return listing;
     });
+  }
+
+  openListingModal(listing: Listing) {
+    this.selectedListing = listing;
+    this.isUpvoted = false;
+  }
+
+  closeListingModal() {
+    this.selectedListing = null;
+  }
+
+  async deleteSelectedListing() {
+    if (!this.selectedListing) return;
+    await this.deleteListing(this.selectedListing.id, this.selectedListing.yearMonth);
+    this.closeListingModal();
   }
 }
 
