@@ -20,6 +20,7 @@
   import { Label } from '$lib/components/ui/label';
   import { Textarea } from '$lib/components/ui/textarea';
   import { AGGREGATOR_URL, PUBLISHER_URL } from '$lib/shared/shared.constant';
+  import smwug from '$lib/assets/smwug.png';
 
   let isDialogOpen = $state(false);
   let title = $state('');
@@ -88,7 +89,11 @@
 <div class="container mx-auto p-4">
   <div class="mb-6 flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <div class="h-12 w-12 rounded-full bg-gray-200"></div>
+      <img
+        src={smwug}
+        alt="Show Me What You Got"
+        class="h-12 w-12 rounded-full object-contain"
+      />
       <div class="text-2xl font-bold">Show Me What You Got</div>
     </div>
     <div class="flex items-center gap-4">
@@ -145,7 +150,7 @@
 </div>
 
 <Dialog bind:open={isDialogOpen}>
-  <DialogContent>
+  <DialogContent class="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
     <DialogHeader>
       <DialogTitle>Create New Listing</DialogTitle>
       <DialogDescription>
@@ -210,7 +215,7 @@
   open={appState.selectedListing !== null}
   onOpenChange={(open) => !open && appState.closeListingModal()}
 >
-  <DialogContent class="sm:max-w-2xl">
+  <DialogContent class="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
     {#if appState.selectedListing}
       <DialogHeader>
         <DialogTitle class="text-3xl font-bold"
@@ -223,11 +228,13 @@
 
       <div class="space-y-4 py-4">
         {#if appState.selectedListing.imageBlobId && appState.selectedListing.imageBlobId !== 'null' && appState.selectedListing.imageBlobId !== 'placeholder blob id'}
-          <img
-            src={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
-            alt={appState.selectedListing.title}
-            class="w-full rounded-lg object-cover"
-          />
+          <div class="aspect-[16/9] w-full overflow-hidden rounded-lg">
+            <img
+              src={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
+              alt={appState.selectedListing.title}
+              class="h-full w-full object-cover"
+            />
+          </div>
         {/if}
         <p class="text-gray-600">{appState.selectedListing.description}</p>
 
