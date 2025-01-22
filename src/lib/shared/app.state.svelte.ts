@@ -1,4 +1,4 @@
-import { destroyListing, getListings } from './contract.tools';
+import { destroyListing, getListings, upvoteListing } from './contract.tools';
 import type { Listing } from './shared.type';
 
 export class AppState {
@@ -19,14 +19,30 @@ export class AppState {
   }
 
   getListing(listingId: string) {
-    console;
-
     return this.listings.find((listing) => listing.id === listingId);
   }
 
   async deleteListing(listingId: string, yearMonth: string) {
     await destroyListing(listingId, yearMonth);
     this.listings = this.listings.filter((listing) => listing.id !== listingId);
+  }
+
+  async upvoteDownvoteListing(
+    listingId: string,
+    yearMonth: string,
+    senderAddress: string
+  ) {
+    await upvoteListing(listingId, yearMonth);
+    this.listings = this.listings.map((listing) => {
+      if (listing.id === listingId) {
+        const hasUpvoted = listing.upvotes.includes(senderAddress);
+        const upvotes = hasUpvoted
+          ? listing.upvotes.filter((addr) => addr !== senderAddress)
+          : [...listing.upvotes, senderAddress];
+        return { ...listing, upvotes };
+      }
+      return listing;
+    });
   }
 }
 

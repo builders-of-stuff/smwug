@@ -88,12 +88,6 @@
     });
   });
 
-  async function handleUpvote() {
-    // Implement upvote logic
-    isUpvoted = !isUpvoted;
-    // selectedListing.upvotes += isUpvoted ? 1 : -1;
-  }
-
   async function handleDelete() {
     if (!selectedListing) return;
 
@@ -151,6 +145,7 @@
           {/if}
           <div class="flex-1">
             <h3 class="text-lg font-semibold">{listing.title}</h3>
+            <p class="text-sm text-gray-600">{listing.subtitle}</p>
             <p class="text-sm text-gray-500">{listing.description}</p>
           </div>
           <div class="flex items-center gap-6">
@@ -160,7 +155,7 @@
             </div>
             <div class="flex items-center gap-2 text-gray-500">
               <span class="i-lucide-arrow-up text-lg" />
-              <span>{listing.upvotes}</span>
+              <span>{listing.upvotes.length}</span>
             </div>
           </div>
         </div>
@@ -236,13 +231,32 @@
     {#if selectedListing}
       <DialogHeader>
         <DialogTitle class="text-3xl font-bold">{selectedListing.title}</DialogTitle>
+        <DialogDescription class="text-xl">{selectedListing.subtitle}</DialogDescription
+        >
       </DialogHeader>
 
       <div class="space-y-4 py-4">
+        {#if selectedListing.imageBlobId && selectedListing.imageBlobId !== 'null' && selectedListing.imageBlobId !== 'placeholder blob id'}
+          <img
+            src={`${AGGREGATOR_URL}/v1/blobs/${selectedListing.imageBlobId}`}
+            alt={selectedListing.title}
+            class="w-full rounded-lg object-cover"
+          />
+        {/if}
         <p class="text-gray-600">{selectedListing.description}</p>
 
         <div class="flex gap-2">
-          <Button variant={isUpvoted ? 'default' : 'outline'} onclick={handleUpvote}>
+          <Button
+            variant={isUpvoted ? 'default' : 'outline'}
+            onclick={() =>
+              selectedListing &&
+              walletAdapter.currentAccount &&
+              appState.upvoteDownvoteListing(
+                selectedListing?.id,
+                selectedListing?.yearMonth,
+                walletAdapter.currentAccount?.address
+              )}
+          >
             ↑ {selectedListing.upvotes.length}
           </Button>
 

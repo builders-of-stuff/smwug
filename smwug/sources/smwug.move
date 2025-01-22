@@ -92,6 +92,37 @@ public fun create_listing(
     };
 }
 
+public fun upvote_listing(
+    registry: &mut ListingsRegistry,
+    listing_id: ID,
+    year_month: String,
+    ctx: &mut TxContext,
+) {
+    assert!(vec_map::contains(&registry.listings, &year_month), 0);
+    let listings_vec = vec_map::get_mut(&mut registry.listings, &year_month);
+
+    let mut i = 0;
+    let len = vector::length(listings_vec);
+    while (i < len) {
+        let listing = vector::borrow_mut(listings_vec, i);
+        if (object::uid_to_inner(&listing.id) == &listing_id) {
+            let sender = tx_context::sender(ctx);
+            if (vector::contains(&listing.upvotes, &sender)) {
+                // Remove upvote if user has already upvoted
+                let (exists, index) = vector::index_of(&listing.upvotes, &sender);
+                if (exists) {
+                    vector::remove(&mut listing.upvotes, index);
+                };
+            } else {
+                // Add upvote if user hasn't upvoted
+                vector::push_back(&mut listing.upvotes, sender);
+            };
+            break
+        };
+        i = i + 1;
+    };
+}
+
 public fun destroy_listing(
     registry: &mut ListingsRegistry,
     listing_id: ID,

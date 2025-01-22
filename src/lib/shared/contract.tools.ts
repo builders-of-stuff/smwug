@@ -129,3 +129,43 @@ export const getListings = async () => {
 
   return mappedListings;
 };
+
+export const upvoteListing = async (listingId: string, yearMonth: string) => {
+  if (!walletAdapter?.currentAccount?.address) {
+    return;
+  }
+
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::smwug::upvote_listing`,
+    arguments: [
+      tx.object(`${LISTINGS_REGISTRY_ID}`),
+      tx.pure.id(listingId),
+      tx.pure.string(yearMonth)
+    ]
+  });
+  console.log('1: ', listingId, yearMonth);
+
+  try {
+    const { bytes, signature } = await walletAdapter.signTransaction(tx as any, {});
+    console.log('2');
+
+    const executedTx = await walletAdapter.suiClient.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature: signature,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+        showInput: true,
+        showRawInput: true
+      }
+    });
+
+    console.log('executedTx: ', executedTx);
+    return executedTx;
+  } catch (e) {
+    console.log(e);
+  }
+};
