@@ -74,13 +74,13 @@
    * Fetch listings upon connect
    */
   $effect(() => {
-    if (!walletAdapter.isConnected || appState.hasFetchedListings) {
+    if (appState?.hasFetchedListings) {
       return;
     }
 
     untrack(() => {
       (async () => {
-        await appState.getListings();
+        await appState?.getListings();
       })();
     });
   });
@@ -228,12 +228,19 @@
 
       <div class="space-y-4 py-4">
         {#if appState.selectedListing.imageBlobId && appState.selectedListing.imageBlobId !== 'null' && appState.selectedListing.imageBlobId !== 'placeholder blob id'}
-          <div class="aspect-[16/9] w-full overflow-hidden rounded-lg">
-            <img
-              src={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
-              alt={appState.selectedListing.title}
-              class="h-full w-full object-cover"
-            />
+          <div class="aspect-[16/9] w-full overflow-auto rounded-lg">
+            <a
+              href={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="cursor-zoom-in"
+            >
+              <img
+                src={`${AGGREGATOR_URL}/v1/blobs/${appState.selectedListing.imageBlobId}`}
+                alt={appState.selectedListing.title}
+                class="min-h-full min-w-full object-contain"
+              />
+            </a>
           </div>
         {/if}
         <p class="text-gray-600">{appState.selectedListing.description}</p>

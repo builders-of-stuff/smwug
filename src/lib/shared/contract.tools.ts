@@ -112,10 +112,6 @@ export const destroyListing = async (listingId: string, yearMonth: string) => {
  * Get listings & map to frontend format
  */
 export const getListings = async () => {
-  if (!walletAdapter?.currentAccount?.address) {
-    return;
-  }
-
   const listings = await walletAdapter.suiClient.getObject({
     id: `${LISTINGS_REGISTRY_ID}`,
     options: {
