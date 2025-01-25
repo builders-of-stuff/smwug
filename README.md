@@ -1,3 +1,5 @@
+https://youtu.be/a8Ur9oAdVwI
+
 # sv
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
